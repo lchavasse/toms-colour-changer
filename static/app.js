@@ -250,6 +250,11 @@ fileInput.addEventListener('change', () => {
   if (fileInput.files[0]) setFile(fileInput.files[0]);
 });
 
+document.getElementById('browse-btn').addEventListener('click', e => {
+  e.stopPropagation();
+  fileInput.click();
+});
+
 dropZone.addEventListener('click', e => {
   if (e.target === removeFile || removeFile.contains(e.target)) return;
   if (!selectedFile) fileInput.click();
