@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chroma — docx Color Changer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+  <div class="bg-grid"></div>
+
+  <main class="container">
+    <header class="app-header">
+      <div class="logo-mark">
+        <span class="logo-dot" style="--c: #ef4444"></span>
+        <span class="logo-dot" style="--c: #6366f1"></span>
+      </div>
+      <h1>Chroma</h1>
+      <p class="subtitle">Replace any text color in your Word documents — with perceptual hue matching, not just hex codes.</p>
+    </header>
+
+    <div class="card">
+
+      <!-- Step 1: Upload -->
+      <section class="step">
+        <div class="step-label"><span class="step-num">01</span> Upload document</div>
+        <div class="drop-zone" id="drop-zone">
+          <input type="file" id="file-input" accept=".docx" hidden>
+          <div class="drop-icon">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/>
+              <line x1="12" y1="13" x2="12" y2="17"/>
+              <polyline points="9 15 12 12 15 15"/>
+            </svg>
+          </div>
+          <p class="drop-text">Drop your <strong>.docx</strong> file here</p>
+          <p class="drop-sub">or <button class="link-btn" onclick="document.getElementById('file-input').click()">browse to upload</button></p>
+          <div class="file-badge" id="file-badge" hidden>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/>
+            </svg>
+            <span id="file-name">filename.docx</span>
+            <button class="remove-file" id="remove-file" title="Remove file">×</button>
+          </div>
+        </div>
+      </section>
+
+      <div class="divider"></div>
+
+      <!-- Step 2: Colors -->
+      <section class="step">
+        <div class="step-label"><span class="step-num">02</span> Choose colors</div>
+
+        <div class="color-row">
+          <!-- FROM color -->
+          <div class="color-field">
+            <label class="field-label">Replace this color</label>
+            <div class="color-input-group" id="from-group">
+              <button class="color-swatch-btn" id="from-swatch" style="background:#FF0000" title="Pick color" aria-label="Pick source color"></button>
+              <input type="text" class="hex-input" id="from-hex" value="#FF0000" maxlength="7" spellcheck="false" autocomplete="off">
+            </div>
+            <!-- Popup -->
+            <div class="color-popup" id="from-popup" hidden>
+              <p class="popup-section-label">Common colors</p>
+              <div class="swatch-grid" id="from-swatches"></div>
+              <div class="popup-divider"></div>
+              <div class="custom-row">
+                <label class="popup-section-label" for="from-native">Custom</label>
+                <input type="color" class="native-picker" id="from-native" value="#FF0000">
+              </div>
+            </div>
+          </div>
+
+          <div class="arrow-wrap">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="5" y1="12" x2="19" y2="12"/>
+              <polyline points="12 5 19 12 12 19"/>
+            </svg>
+          </div>
+
+          <!-- TO color -->
+          <div class="color-field">
+            <label class="field-label">Replace with</label>
+            <div class="color-input-group" id="to-group">
+              <button class="color-swatch-btn" id="to-swatch" style="background:#008000" title="Pick color" aria-label="Pick target color"></button>
+              <input type="text" class="hex-input" id="to-hex" value="#008000" maxlength="7" spellcheck="false" autocomplete="off">
+            </div>
+            <!-- Popup -->
+            <div class="color-popup" id="to-popup" hidden>
+              <p class="popup-section-label">Common colors</p>
+              <div class="swatch-grid" id="to-swatches"></div>
+              <div class="popup-divider"></div>
+              <div class="custom-row">
+                <label class="popup-section-label" for="to-native">Custom</label>
+                <input type="color" class="native-picker" id="to-native" value="#008000">
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div class="divider"></div>
+
+      <!-- Step 3: Tolerance -->
+      <section class="step">
+        <div class="step-label"><span class="step-num">03</span> Tune matching</div>
+
+        <div class="sliders">
+          <div class="slider-group">
+            <div class="slider-header">
+              <label for="hue-slider" class="field-label">Hue tolerance</label>
+              <span class="slider-value" id="hue-value">30°</span>
+            </div>
+            <p class="slider-hint">How far from the source hue to match. Higher = catches more shades.</p>
+            <input type="range" id="hue-slider" min="0" max="180" value="30" step="1">
+            <div class="hue-preview" id="hue-preview" title="Matched hue range"></div>
+          </div>
+
+          <div class="slider-group">
+            <div class="slider-header">
+              <label for="sat-slider" class="field-label">
+                Min saturation
+                <span class="tooltip-anchor">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <line x1="12" y1="16" x2="12" y2="12"/>
+                    <line x1="12" y1="8" x2="12.01" y2="8"/>
+                  </svg>
+                  <span class="tooltip">Ignores near-grey text even if it has the right hue. Prevents accidental changes to muted or desaturated colors.</span>
+                </span>
+              </label>
+              <span class="slider-value" id="sat-value">15%</span>
+            </div>
+            <input type="range" id="sat-slider" min="0" max="100" value="15" step="1">
+          </div>
+        </div>
+      </section>
+
+      <div class="divider"></div>
+
+      <!-- Submit -->
+      <section class="step submit-section">
+        <button class="process-btn" id="process-btn" disabled>
+          <span class="btn-idle">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <polyline points="8 17 12 21 16 17"/>
+              <line x1="12" y1="12" x2="12" y2="21"/>
+              <path d="M20.88 18.09A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.29"/>
+            </svg>
+            Process &amp; Download
+          </span>
+          <span class="btn-loading" hidden>
+            <span class="spinner"></span>
+            Processing…
+          </span>
+        </button>
+
+        <div class="status" id="status" hidden>
+          <div class="status-success" id="status-success" hidden>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+            <span id="status-text">Done.</span>
+          </div>
+          <div class="status-error" id="status-error" hidden>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="12" y1="8" x2="12" y2="12"/>
+              <line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+            <span id="error-text">Something went wrong.</span>
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+    <footer class="app-footer">
+      Processes entirely in-memory · files never stored
+    </footer>
+  </main>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
